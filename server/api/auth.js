@@ -3,6 +3,8 @@ const router = express.Router()
 
 const Account = require('../schema/account')
 
+const checkUser = require('../integrations/checkUser')
+
 router.post('/signup', async function(req, res){
   const email = req.body.email
   const password = req.body.password
@@ -19,6 +21,18 @@ router.post('/signup', async function(req, res){
     })
     newAccount = await newAccount.save()
     res.json(newAccount)
+  }
+})
+
+router.post('/login', async function(req, res){
+  const email = req.body.email
+  const password = req.body.password
+
+  const account = await checkUser(email, password)
+  if(!account){
+    res.sendStatus(400)
+  }else{
+    res.json(account)
   }
 })
 

@@ -21,7 +21,7 @@
 import Login from './subcomponents/Login.vue'
 import Signup from './subcomponents/Signup.vue'
 export default {
-  name: 'HelloWorld',
+  name: 'Index',
   data () {
     return {
       login: true

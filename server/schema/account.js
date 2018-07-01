@@ -6,6 +6,7 @@ const accountSchema = new Schema({
   email: String,
   password: String,
   workspace: [{
+    workspaceName: String,
     name: String,
     id: Schema.Types.ObjectId,
     password: String
