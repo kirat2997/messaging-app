@@ -4,7 +4,9 @@
   "description": "Ever wondered how WhatsApp was built and scaled to support a user\r base of half a billion? Most startups use Slack as their internal\r communication tool. Facebook too has launched a Workplace app to\r be used by businesses.\r The task is to build a flexible, scalable and robust Web based messaging\r app similar to Slack. We understand that building a messaging app may\r seem too simple for rockstars like you. So features like groups, mentions,\r integration with external tools, bots are always welcome. Please keep in\r mind that we won’t bother much about the features. The features are\r only a way for you to implement complex designs and give you room for\r innovation.\r We will be mainly looking for design, use cases, test cases and of course,\r your code. Please keep scalability and extensibility in mind.\r I would also like to point out that only the people completing the task\r would go on to the next round.\r There is no restriction as to what tools you can use as long as it doesn’t\r overshadow your contribution to the task itself. We are of the opinion\r that tools would hinder your ability to showcase your skills. However, we\r also understand that as the complexity of your app increases, tools will\r allow you to adhere to the deadline.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server",
+    "start": "node server"
   },
   "repository": {
     "type": "git",

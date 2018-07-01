@@ -11,9 +11,10 @@ mongoose.Promise = global.Promise
 mongoose.connect(process.env.TEST_DB_URL)
 
 app.set('view engine','html')
-app.use(passport.initialize())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+
+app.use('/api', require('./api/auth'))
 
 app.listen(PORT, () => {
   console.log(`Server up - localhost:${PORT}`)
