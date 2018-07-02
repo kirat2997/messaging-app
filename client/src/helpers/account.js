@@ -71,3 +71,40 @@ export async function fetchWorkspace (workspaceId) {
     return false
   }
 }
+
+export async function sendInvite (data) {
+  try {
+    const accountId = store.state.user._id
+    const token = store.state.token
+    const response = await axios.request({
+      url: `/api/sendInvite/${accountId}`,
+      method: 'post',
+      data,
+      headers: {'Authorization': 'Bearer ' + token}
+    })
+    if (response.status === 200) {
+      return response.data
+    }
+  } catch (e) {
+    return false
+  }
+}
+
+export async function acceptInvite (data) {
+  try {
+    const accountId = store.state.user._id
+    const token = store.state.token
+    const response = await axios.request({
+      url: `/api/acceptInvite/${accountId}`,
+      method: 'post',
+      data,
+      headers: {'Authorization': 'Bearer ' + token}
+    })
+    if (response.status === 200) {
+      store.commit('USER_DATA', response.data)
+      return 'success'
+    }
+  } catch (e) {
+    return false
+  }
+}

@@ -4,13 +4,13 @@ const router = express.Router()
 const Account = require('../schema/account')
 const Workspace = require('../schema/workspace')
 
-const { filterAccountData } = require('../helpers/filterData')
+const { filterAccountData, filterWorkspaceData } = require('../helpers/filterData')
 router.post('/createWorkspace/:accountId', async function(req, res){
   const name = req.body.name
   const displayName = req.body.displayName
   const password = req.body.password
   
-  const existingWorkspace = await Workspace.findOne({name, admin: req.params.accountId})
+  const existingWorkspace = await Workspace.findOne({name})
   if(existingWorkspace){
     res.sendStatus(420)  
   }else{
@@ -63,8 +63,9 @@ router.post('/workspaceLogin/:accountId', async function(req, res){
 
 router.get('/fetchWorkspace/:id', async function(req, res){
   const id = req.params.id
-  const workspace = await Workspace.findOne({_id: id})
+  let workspace = await Workspace.findOne({_id: id})
   if (workspace) {
+    workspace = await filterWorkspaceData(workspace)
     res.json(workspace)
   } else { 
     res.sendStatus(400)

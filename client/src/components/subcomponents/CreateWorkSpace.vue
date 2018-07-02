@@ -73,7 +73,7 @@ export default {
           this.dialog = false
         } else if (resp === 'exist') {
           this.snackbar = true
-          this.text = 'WorkSpace already exist for you account.'
+          this.text = 'WorkSpace already exist.'
         } else {
           this.snackbar = true
           this.text = 'Some error occured! Please try again'

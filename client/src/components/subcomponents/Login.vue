@@ -52,9 +52,6 @@ export default {
         if (resp === 'no account') {
           this.snackbar = true
           this.text = 'Email or password is incorrect.'
-        } else {
-          this.snackbar = true
-          this.text = 'Some error occured! Please try again'
         }
       }
     }

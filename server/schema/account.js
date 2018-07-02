@@ -13,7 +13,8 @@ const accountSchema = new Schema({
   }],
   invitations: [{
     wsid: Schema.Types.ObjectId,
-    from: String
+    from: String,
+    wsname: String
   }]
 })
 // Export Mongoose model

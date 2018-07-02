@@ -52,7 +52,11 @@ export async function userLogin (email, password) {
 export async function shouldContinueOrNot (to, from, next) {
   if (store.state.isAuthenticated) {
     if (store.state.workspaceStatus) {
-      next()
+      if (to.params.channel) {
+        next()
+      } else {
+        next('/workspace/general')
+      }
     } else {
       next('/home')
     }
@@ -77,6 +81,7 @@ export async function isAuthenticated (to, from, next) {
     if (store.state.workspaceStatus) {
       next('/workspace')
     } else {
+      await fetchUser()
       next()
     }
   } else {
@@ -122,6 +127,22 @@ async function getUserFromToken (decoded) {
   try {
     const response = await axios.request({
       url: `/api/accounts/${decoded.accountId}`,
+      headers: {'Authorization': 'Bearer ' + store.state.token},
+      method: 'get'
+    })
+    store.commit('USER_DATA', response.data)
+  } catch (e) {
+    if (e.response.status === 401) {
+      return false
+    }
+  }
+  return true
+}
+
+async function fetchUser () {
+  try {
+    const response = await axios.request({
+      url: `/api/accounts/${store.state.user._id}`,
       headers: {'Authorization': 'Bearer ' + store.state.token},
       method: 'get'
     })

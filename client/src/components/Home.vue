@@ -18,8 +18,41 @@
             <v-flex v-if="invitation.length === 0">
               You have no pending invitations
             </v-flex>
-            <v-flex xs8 offset-xs2 v-else>
-              INVITAION LIST
+            <v-flex xs10 offset-xs1 v-else>
+              <v-list three-line flat>
+                <template v-for="(item, index) in invitation">
+                  <v-list-tile
+                    :key="index"
+                    avatar
+                  >
+                    <v-list-tile-content>
+                      <v-list-tile-title v-html="item.wsname"></v-list-tile-title>
+                      <v-list-tile-sub-title>From: {{item.from}}</v-list-tile-sub-title>
+                      <v-dialog v-model="dialog" width="500">
+                        <v-btn slot="activator" class="white--text" color="teal darken-2">Accept</v-btn>
+                        <v-card>
+                          <v-card-text>
+                            <v-text-field v-model="name" type="text" label="Enter display name" hint="Not Required" :persistent-hint="true"></v-text-field>
+                            <v-text-field v-model="password" type="password" label="Enter workspace password" required></v-text-field>
+                          </v-card-text>
+                          <v-divider></v-divider>
+                          <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                              color="teal darken-2"
+                              flat
+                              @click="accept(item.wsid)"
+                            >
+                              I accept
+                            </v-btn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-dialog>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  <v-divider :key="index + 10" v-if="index + 1 < invitation.length"></v-divider>
+                </template>
+              </v-list>
             </v-flex>
           </v-layout>
         </v-flex>
@@ -47,6 +80,7 @@
 <script>
 import CreateWorkSpace from './subcomponents/CreateWorkSpace.vue'
 import EnterWorkSpace from './subcomponents/EnterWorkSpace.vue'
+import { acceptInvite } from '../helpers/account'
 export default {
   props: ['data'],
   name: 'Home',
@@ -56,7 +90,10 @@ export default {
       workspace: [],
       invitation: [],
       snackbar: false,
-      text: null
+      text: null,
+      dialog: false,
+      name: null,
+      password: null
     }
   },
   components: {
@@ -64,6 +101,11 @@ export default {
     EnterWorkSpace
   },
   methods: {
+    updateList () {
+      const user = this.$store.state.user
+      this.workspace = user.workspace
+      this.invitation = user.invitations
+    },
     reset () {
       this.$store.commit('RESET_STATE')
       this.$router.push('/')
@@ -72,6 +114,21 @@ export default {
       this.snackbar = true
       this.text = data
       this.workspace = this.$store.state.user.workspace
+    },
+    async accept (wsid) {
+      if (this.password) {
+        if (!this.name) {
+          this.name = this.$store.state.user.name
+        }
+        const resp = await acceptInvite({wsid, name: this.name, password: this.password})
+        console.log(resp)
+        if (resp) {
+          this.snackbar = true
+          this.text = 'Accepted'
+        }
+        this.dialog = false
+        this.updateList()
+      }
     }
   },
   beforeMount () {

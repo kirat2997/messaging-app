@@ -6,7 +6,7 @@ const workspaceSchema = new Schema({
   channels: [String],
   admin: Schema.Types.ObjectId,
   members: [{
-    id: Schema.Types.ObjectId
+    id: Schema.Types.ObjectId,
   }]
 })
 // Export Mongoose model

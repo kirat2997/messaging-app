@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Index from '@/components/Index'
 import Home from '@/components/Home'
 import WorkSpace from '@/components/WorkSpace'
+import ChatRoom from '@/components/ChatRoom'
 
 import { checkToken, shouldContinueOrNot, shouldContinueOrNotIndex, isAuthenticated } from '../helpers/auth'
 
@@ -32,7 +33,14 @@ export default new Router({
       beforeEnter: shouldContinueOrNot,
       props: (route) => ({
         channel: route.params.channel
-      })
+      }),
+      children: [{
+        path: '/',
+        component: ChatRoom,
+        props: (route) => ({
+          channel: route.params.channel
+        })
+      }]
     }
   ]
 })
