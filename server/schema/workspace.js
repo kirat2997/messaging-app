@@ -7,6 +7,10 @@ const workspaceSchema = new Schema({
   admin: Schema.Types.ObjectId,
   members: [{
     id: Schema.Types.ObjectId,
+    active: {
+      type: Boolean,
+      default: false
+    }
   }]
 })
 // Export Mongoose model

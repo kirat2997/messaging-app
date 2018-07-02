@@ -14,8 +14,18 @@ const filterWorkspaceData = async function (workspaceData) {
   await Promise.all(workspaceData.members.map((member) => {
     return (async function () {
       const account = await Account.findOne({_id: member.id})
+      let displayName
+      account.workspace.forEach(ws => {
+        if (ws.id.equals(workspaceData._id)){
+          displayName = ws.name
+        }
+      })
+      if(!displayName)
+        displayName = account.name
       let data = {
-        name: account.name
+        name: account.name,
+        displayName,
+        active: member.active
       }
       members.push(data)
     })()

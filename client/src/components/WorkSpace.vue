@@ -35,14 +35,17 @@
       <v-list dense>
         <v-list-tile v-for="m in members" :key="m.name">
           <v-list-tile-content>
-            <v-list-tile-title v-if="m.name === currentUser">{{ m.name }} (You)</v-list-tile-title>
-            <v-list-tile-title v-else>{{ m.name }}</v-list-tile-title>
+            <v-list-tile-title v-if="m.name === currentUser">{{ m.displayName }} (You)</v-list-tile-title>
+            <v-list-tile-title v-else>{{ m.displayName }}</v-list-tile-title>
           </v-list-tile-content>
+          <v-list-tile-action>
+            <v-icon :color="m.active ? 'teal' : 'grey'">fiber_manual_record</v-icon>
+          </v-list-tile-action>
         </v-list-tile>
       </v-list>
       <v-divider></v-divider>
       <v-dialog v-model="dialog" persistent max-width="500px">
-        <v-btn slot="activator" flat>Invite People</v-btn>
+        <v-btn slot="activator" style="margin-left: 50%;" flat>Invite People</v-btn>
         <v-card>
           <v-card-text>
             <v-container grid-list-md>
@@ -74,7 +77,7 @@
           align-center
         >
           <v-flex text-xs-center>
-            <router-view />
+            <ChatRoom v-for="c in channels" :key="c" v-if="channel === c" v-bind:cname="c" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser"/>
           </v-flex>
         </v-layout>
       </v-container>
@@ -114,9 +117,11 @@ export default {
       this.members = this.workspace.members
       this.channels = this.workspace.channels
     }
+    this.$socket.emit('join', {channels: this.channels, userId: this.$store.state.user._id, workspace: this.workspace})
   },
   methods: {
     signout () {
+      this.$socket.emit('signout', {workspace: this.workspace, userId: this.$store.state.user._id})
       this.$store.commit('RESET_WORKSPACE')
       this.$router.push('/home')
     },
@@ -132,6 +137,12 @@ export default {
         }
         this.dialog = false
       }
+    }
+  },
+  sockets: {
+    updateActiveList (data) {
+      this.members = data.members
+      this.channels = data.channels
     }
   },
   computed: {

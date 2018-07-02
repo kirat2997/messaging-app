@@ -43,7 +43,7 @@
                               flat
                               @click="accept(item.wsid)"
                             >
-                              I accept
+                              Accept
                             </v-btn>
                           </v-card-actions>
                         </v-card>
@@ -121,7 +121,6 @@ export default {
           this.name = this.$store.state.user.name
         }
         const resp = await acceptInvite({wsid, name: this.name, password: this.password})
-        console.log(resp)
         if (resp) {
           this.snackbar = true
           this.text = 'Accepted'
