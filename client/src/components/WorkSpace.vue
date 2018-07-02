@@ -2,9 +2,12 @@
   <v-app id="inspire">
     <v-content>
       <v-container fluid fill-height>
-        <v-layout v-bind="binding" align-center justify-center>
+        <v-layout v-if="workspace" v-bind="binding" align-center justify-center>
           {{ workspace.name }}
           <v-btn @click="signout">Sign out</v-btn>
+        </v-layout>
+        <v-layout v-else>
+          LOADING....
         </v-layout>
       </v-container>
     </v-content>

@@ -3,10 +3,17 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const socketIO = require('socket.io')
+const http = require('http')
 
 const jwtAuth = require('./jwt/auth')
 
 const app = express()
+const server = http.createServer(app)
+const io = socketIO(server)
+
+require('./socket')(io)
+
 const PORT = process.env.PORT || 3000
 
 mongoose.Promise = global.Promise
@@ -22,6 +29,6 @@ app.use('/api/*', jwtAuth)
 app.use('/api', require('./api/account'))
 app.use('/api', require('./api/workspace'))
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server up - localhost:${PORT}`)
 })

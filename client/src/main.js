@@ -6,11 +6,16 @@ import App from './App'
 import router from './router'
 import store from './vuex/store'
 import { sync } from 'vuex-router-sync'
+import io from 'socket.io-client'
+import VueSocketIO from 'vue-socket.io'
 
 import('../node_modules/vuetify/dist/vuetify.min.css')
 Vue.use(Vuetify)
 
 sync(store, router)
+
+const socket = io('http://localhost:3000')
+Vue.use(VueSocketIO, socket, store)
 
 Vue.config.productionTip = false
 
@@ -19,6 +24,7 @@ new Vue({
   el: '#app',
   router,
   store,
+  socket,
   components: { App },
   template: '<App/>'
 })
