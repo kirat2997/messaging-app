@@ -29,6 +29,7 @@ export async function createWorkspace (name, displayName, password) {
     }
   }
 }
+
 export async function workspaceLogin (id, password) {
   try {
     const accountId = store.state.user._id
@@ -43,7 +44,8 @@ export async function workspaceLogin (id, password) {
       }
     })
     if (response.status === 200) {
-      router.push(`/workspace/${id}`)
+      store.commit('SET_WORKSPACE_ACTIVE', {id, status: true})
+      router.push(`/workspace`)
     }
   } catch (e) {
     if (e.response.status === 404) {
@@ -51,5 +53,21 @@ export async function workspaceLogin (id, password) {
     } else {
       return false
     }
+  }
+}
+
+export async function fetchWorkspace (workspaceId) {
+  try {
+    const token = store.state.token
+    const response = await axios.request({
+      url: `/api/fetchWorkspace/${workspaceId}`,
+      method: 'get',
+      headers: {'Authorization': 'Bearer ' + token}
+    })
+    if (response.status === 200) {
+      return response.data
+    }
+  } catch (e) {
+    return false
   }
 }

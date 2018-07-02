@@ -61,4 +61,14 @@ router.post('/workspaceLogin/:accountId', async function(req, res){
   }
 })
 
+router.get('/fetchWorkspace/:id', async function(req, res){
+  const id = req.params.id
+  const workspace = await Workspace.findOne({_id: id})
+  if (workspace) {
+    res.json(workspace)
+  } else { 
+    res.sendStatus(400)
+  }
+})
+
 module.exports = router

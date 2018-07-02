@@ -51,7 +51,22 @@ export async function userLogin (email, password) {
 
 export async function shouldContinueOrNot (to, from, next) {
   if (store.state.isAuthenticated) {
-    next('/home')
+    if (store.state.workspaceStatus) {
+      next()
+    } else {
+      next('/home')
+    }
+  } else {
+    next('/')
+  }
+}
+export async function shouldContinueOrNotIndex (to, from, next) {
+  if (store.state.isAuthenticated) {
+    if (store.state.workspaceStatus) {
+      next('/workspace')
+    } else {
+      next('/home')
+    }
   } else {
     next()
   }
@@ -59,7 +74,11 @@ export async function shouldContinueOrNot (to, from, next) {
 
 export async function isAuthenticated (to, from, next) {
   if (store.state.isAuthenticated) {
-    next()
+    if (store.state.workspaceStatus) {
+      next('/workspace')
+    } else {
+      next()
+    }
   } else {
     next('/')
   }

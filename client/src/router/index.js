@@ -4,7 +4,7 @@ import Index from '@/components/Index'
 import Home from '@/components/Home'
 import WorkSpace from '@/components/WorkSpace'
 
-import { checkToken, shouldContinueOrNot, isAuthenticated } from '../helpers/auth'
+import { checkToken, shouldContinueOrNot, shouldContinueOrNotIndex, isAuthenticated } from '../helpers/auth'
 
 Vue.use(Router)
 
@@ -15,7 +15,7 @@ export default new Router({
       path: '/',
       name: 'Index',
       component: Index,
-      beforeEnter: shouldContinueOrNot
+      beforeEnter: shouldContinueOrNotIndex
     },
     {
       path: '/callback/:token',
@@ -27,10 +27,11 @@ export default new Router({
       beforeEnter: isAuthenticated
     },
     {
-      path: '/workspace/:id?',
+      path: '/workspace/:channel?',
       component: WorkSpace,
+      beforeEnter: shouldContinueOrNot,
       props: (route) => ({
-        id: route.params.id
+        channel: route.params.channel
       })
     }
   ]
