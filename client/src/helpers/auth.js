@@ -38,7 +38,6 @@ export async function userLogin (email, password) {
       }
     })
     if (response.status === 200) {
-      console.log(response.data)
       await checkToken(response.data)
     }
   } catch (e) {

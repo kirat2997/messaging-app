@@ -6,12 +6,16 @@ Vue.use(Vuex)
 const state = {
   user: null,
   token: null,
-  isAuthenticated: false
+  isAuthenticated: false,
+  workspaces: []
 }
 
 const mutations = {
   USER_DATA: (state, data) => {
     state.user = data
+  },
+  WORKSPACE_DATA: (state, data) => {
+    state.workspaces = data
   },
   CHANGE_AUTH_STATE: (state, auth) => {
     state.isAuthenticated = auth
@@ -23,6 +27,7 @@ const mutations = {
     state.token = null
     state.user = null
     state.isAuthenticated = false
+    state.workspaces = []
   }
 }
 

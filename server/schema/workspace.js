@@ -3,8 +3,8 @@ const Schema = mongoose.Schema
 
 const workspaceSchema = new Schema({
   name: String,
-  type: String,
   channels: [String],
+  admin: Schema.Types.ObjectId,
   members: [{
     id: Schema.Types.ObjectId
   }]

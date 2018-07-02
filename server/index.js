@@ -20,6 +20,7 @@ app.use('/api', require('./api/auth'))
 
 app.use('/api/*', jwtAuth)
 app.use('/api', require('./api/account'))
+app.use('/api', require('./api/workspace'))
 
 app.listen(PORT, () => {
   console.log(`Server up - localhost:${PORT}`)

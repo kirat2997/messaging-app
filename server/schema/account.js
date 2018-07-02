@@ -10,6 +10,10 @@ const accountSchema = new Schema({
     name: String,
     id: Schema.Types.ObjectId,
     password: String
+  }],
+  invitations: [{
+    wsid: Schema.Types.ObjectId,
+    from: String
   }]
 })
 // Export Mongoose model

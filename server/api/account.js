@@ -3,8 +3,11 @@ const router = express.Router()
 
 const Account = require('../schema/account')
 
+const { filterAccountData } = require('../helpers/filterData')
+
 router.get('/accounts/:accountId', async function(req, res){
-  const account = await Account.findOne({_id: req.params.accountId})
+  let account = await Account.findOne({_id: req.params.accountId})
+  account = filterAccountData(account)
   res.json(account)
 })
 
