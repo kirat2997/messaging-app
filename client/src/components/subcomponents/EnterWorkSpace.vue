@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-snackbar :top="true" :timeout="1000" v-model="snackbar">{{ text }}</v-snackbar>
     <div v-if="progress" style="z-index:1; background:rgba(0,0,0,0.3); position: fixed; top:0; padding-top:50vh; bottom:0; left:0; right:0;">
       <v-progress-circular :size="50" indeterminate color="teal darken-2"></v-progress-circular>
     </div>
@@ -31,14 +32,23 @@ export default {
   data () {
     return {
       password: null,
-      progress: false
+      progress: false,
+      snackbar: false,
+      text: null
     }
   },
   methods: {
     async enter () {
       if (this.password) {
         this.progress = true
-        await workspaceLogin(this.item.id, this.password)
+        const resp = await workspaceLogin(this.item.id, this.password)
+        if (resp === 'some error') {
+          this.snackbar = true
+          this.text = 'Some error occured! Please try again.'
+        } else {
+          this.snackbar = true
+          this.text = 'Incorrect Password'
+        }
         this.progress = false
       }
     }

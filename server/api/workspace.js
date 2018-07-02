@@ -54,7 +54,9 @@ router.post('/workspaceLogin/:accountId', async function(req, res){
       }
     })
     if(found){
-      res.json('LOGGED IN')
+      res.json(id)
+    } else {
+      res.sendStatus(420)
     }
   }
 })

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
 import Home from '@/components/Home'
+import WorkSpace from '@/components/WorkSpace'
 
 import { checkToken, shouldContinueOrNot, isAuthenticated } from '../helpers/auth'
 
@@ -21,11 +22,15 @@ export default new Router({
       beforeEnter: checkToken
     },
     {
-      path: '/home/:data?',
+      path: '/home',
       component: Home,
-      beforeEnter: isAuthenticated,
+      beforeEnter: isAuthenticated
+    },
+    {
+      path: '/workspace/:id?',
+      component: WorkSpace,
       props: (route) => ({
-        data: route.params.data
+        id: route.params.id
       })
     }
   ]
