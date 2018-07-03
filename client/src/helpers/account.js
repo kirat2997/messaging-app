@@ -86,6 +86,11 @@ export async function sendInvite (data) {
       return response.data
     }
   } catch (e) {
+    if (e.response.status === 404) {
+      return 'not found'
+    } else if (e.response.status === 420) {
+      return 'sent'
+    }
     return false
   }
 }

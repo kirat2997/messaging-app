@@ -167,12 +167,18 @@ export default {
     async invite () {
       if (this.email) {
         const resp = await sendInvite({email: this.email, from: this.currentUser, workspaceId: this.$store.state.workspace, workspaceName: this.workspace.name})
-        if (resp) {
+        if (resp === 'not found') {
+          this.snackbar = true
+          this.text = 'This Email is not registerd with us'
+        } else if (resp === 'sent') {
+          this.snackbar = true
+          this.text = 'Invitation already sent.'
+        } else if (resp) {
           this.snackbar = true
           this.text = 'Invitaion Sent.'
         } else {
           this.snackbar = true
-          this.text = 'This Email is not registerd with us'
+          this.text = 'Some error occured'
         }
         this.dialog = false
       }

@@ -20,15 +20,26 @@ router.post('/sendInvite/:accountId', async (req, res) => {
 
   let account = await Account.findOne({email})
   if (!account) {
-    res.sendStatus(400)
+    res.sendStatus(404)
   } else {
-    account.invitations.push({
-      wsid: workspaceId,
-      wsname: workspaceName,
-      from
+    let exist = false
+    account.invitations.forEach(inv => {
+      if (inv.wsid.equals(workspaceId)){
+        exist = true
+      }
     })
-    await account.save()
-    res.json('success')
+    const workspace = await Workspace.findOne({_id: workspaceId, 'members.id': account._id})
+    if(!exist && !workspace){
+      account.invitations.push({
+        wsid: workspaceId,
+        wsname: workspaceName,
+        from
+      })
+      await account.save()
+      res.json('success')
+    } else {
+      res.sendStatus(420)
+    }
   }
 })
 
