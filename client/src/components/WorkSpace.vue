@@ -36,7 +36,7 @@
       <v-list dense>
         <v-list-tile v-for="m in members" :key="m.name">
           <v-list-tile-content>
-            <v-list-tile-title v-if="m.name === currentUser">{{ m.displayName }} (You)</v-list-tile-title>
+            <v-list-tile-title v-if="m.id === currentUserId">{{ m.displayName }} (You)</v-list-tile-title>
             <v-list-tile-title v-else>{{ m.displayName }}</v-list-tile-title>
           </v-list-tile-content>
           <v-list-tile-action>
@@ -108,6 +108,7 @@ export default {
   async beforeMount () {
     const workspaceId = this.$store.state.workspace
     this.currentUser = this.$store.state.user.name
+    this.currentUserId = this.$store.state.user._id
     if (!workspaceId) {
       this.$router.push('/home')
     } else {

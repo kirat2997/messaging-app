@@ -23,6 +23,7 @@ const filterWorkspaceData = async function (workspaceData) {
       if(!displayName)
         displayName = account.name
       let data = {
+        id: member.id,
         name: account.name,
         displayName,
         active: member.active

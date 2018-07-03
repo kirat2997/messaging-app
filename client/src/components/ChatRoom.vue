@@ -84,7 +84,6 @@ export default {
     },
     channelMessages (data) {
       if (data.channel === this.cname) {
-        // this.messageSet.push(data)
         data.messageSet.forEach(m => {
           if (m.from === this.currentUser) {
             m.from = 'You'
