@@ -35,8 +35,8 @@
           title="Pick your emoji…"
           emoji="point_up"
           id="picker"
-          :native="false"
-          set="messenger"
+          :native="true"
+          :sheetSize="20"
           v-click-outside="hide"
           style="position: absolute; right: 5%; bottom: 15%"
           class="hidden-sm-and-down"
@@ -52,7 +52,7 @@ import { Picker } from 'emoji-mart-vue'
 import ClickOutside from 'vue-click-outside'
 
 export default {
-  props: ['cname', 'wsname', 'currentUser'],
+  props: ['cname', 'wsname', 'currentUser', 'obj', 'type', 'currentUserId'],
   name: 'ChatRoom',
   data () {
     return {
@@ -67,9 +67,15 @@ export default {
     Picker
   },
   beforeMount () {
-    this.$emit('updatePending', this.cname)
-    this.progress = true
-    this.$socket.emit('fetchChannelMessage', {channel: this.cname, workspace: this.wsname})
+    if (this.type === 'channel') {
+      this.$emit('updatePendingChannel', this.cname)
+      this.progress = true
+      this.$socket.emit('fetchChannelMessage', {channel: this.cname, workspace: this.wsname})
+    } else if (this.type === 'member') {
+      this.$emit('updatePendingMember', this.cname)
+      this.progress = true
+      this.$socket.emit('fetchMemberMessage', {myId: this.currentUserId, otherId: this.obj.id, workspace: this.wsname, user: this.currentUser})
+    }
   },
   sockets: {
     newMessage (data) {
@@ -79,11 +85,35 @@ export default {
           this.autoScroll()
         }, 300)
       } else {
-        this.$emit('pending', data.channel)
+        this.$emit('pendingChannel', data.channel)
+      }
+    },
+    newMemberMessage (data) {
+      if ((data.toId === this.currentUserId && data.fromId === this.obj.id) || (data.fromId === this.currentUserId && data.toId === this.obj.id)) {
+        this.messageSet.push(data)
+        setTimeout(() => {
+          this.autoScroll()
+        }, 300)
+      } else {
+        this.$emit('pendingMember', data.fromId)
       }
     },
     channelMessages (data) {
       if (data.channel === this.cname) {
+        data.messageSet.forEach(m => {
+          if (m.from === this.currentUser) {
+            m.from = 'You'
+          }
+        })
+        this.messageSet = [...data.messageSet, ...this.messageSet]
+        setTimeout(() => {
+          this.autoScroll()
+        }, 300)
+      }
+      this.progress = false
+    },
+    memberMessages (data) {
+      if (data.user === this.currentUser) {
         data.messageSet.forEach(m => {
           if (m.from === this.currentUser) {
             m.from = 'You'
@@ -127,7 +157,11 @@ export default {
     },
     sendMessage () {
       if (this.message) {
-        this.$socket.emit('sendMessage', {workspace: this.wsname, channel: this.cname, text: this.message, from: this.currentUser})
+        if (this.type === 'channel') {
+          this.$socket.emit('sendChannelMessage', {workspace: this.wsname, channel: this.cname, text: this.message, from: this.currentUser})
+        } else if (this.type === 'member') {
+          this.$socket.emit('sendMemberMessage', {workspace: this.wsname, fromId: this.currentUserId, text: this.message, from: this.currentUser, toId: this.obj.id})
+        }
         this.message = ''
       }
     }

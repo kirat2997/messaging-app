@@ -26,7 +26,8 @@ const filterWorkspaceData = async function (workspaceData) {
         id: member.id,
         name: account.name,
         displayName,
-        active: member.active
+        active: member.active,
+        pending: false
       }
       members.push(data)
     })()

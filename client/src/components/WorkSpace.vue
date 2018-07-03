@@ -20,7 +20,7 @@
           </v-list-tile>
         </v-list>
       </v-toolbar>
-      <v-subheader>{{ currentUser }}</v-subheader>
+      <v-subheader>{{ currentUserName }}</v-subheader>
       <v-divider></v-divider>
       <v-subheader>Channels</v-subheader>
       <v-list dense>
@@ -34,8 +34,12 @@
       <v-divider></v-divider>
       <v-subheader>Direct Messages</v-subheader>
       <v-list dense>
-        <v-list-tile v-for="m in members" :key="m.name">
-          <v-list-tile-content>
+        <v-list-tile v-for="m in members" :key="m.name" :to="'/workspace/' + m.displayName">
+          <v-list-tile-content v-if="m.pending" class="font-weight-bold subheading">
+            <v-list-tile-title v-if="m.id === currentUserId">{{ m.displayName }} (You)</v-list-tile-title>
+            <v-list-tile-title v-else>{{ m.displayName }}</v-list-tile-title>
+          </v-list-tile-content>
+          <v-list-tile-content v-else>
             <v-list-tile-title v-if="m.id === currentUserId">{{ m.displayName }} (You)</v-list-tile-title>
             <v-list-tile-title v-else>{{ m.displayName }}</v-list-tile-title>
           </v-list-tile-content>
@@ -67,7 +71,7 @@
     </v-navigation-drawer>
     <v-toolbar color="teal darken-2" dark fixed app>
       <v-toolbar-side-icon class="white--text hidden-lg-and-up" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title># {{ channel }}</v-toolbar-title>
+      <v-toolbar-title>{{ channel }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn flat @click="signout">Sign Out</v-btn>
     </v-toolbar>
@@ -75,7 +79,8 @@
       <v-container fluid fill-height>
         <v-layout>
           <v-flex text-xs-left>
-            <ChatRoom v-for="c in channels" @pending="handlePending" @updatePending="handleUpdatePending" :key="c.name" v-if="channel === c.name" v-bind:cname="c.name" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser"/>
+            <ChatRoom v-for="c in channels" v-bind:obj="c" v-bind:type="'channel'" @pendingMember="handlePendingMember" @updatePendingMember="handleUpdatePendingMember" @pendingChannel="handlePendingChannel" @updatePendingChannel="handleUpdatePendingChannel" :key="c.name" v-if="channel === c.name" v-bind:cname="c.name" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser" v-bind:currentUserId="currentUserId"/>
+            <ChatRoom v-for="c in members" v-bind:obj="c" v-bind:type="'member'" @pendingMember="handlePendingMember" @updatePendingMember="handleUpdatePendingMember" @pendingChannel="handlePendingChannel" @updatePendingChannel="handleUpdatePendingChannel" :key="c.name" v-if="channel === c.displayName" v-bind:cname="c.displayName" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser" v-bind:currentUserId="currentUserId"/>
           </v-flex>
         </v-layout>
       </v-container>
@@ -95,6 +100,8 @@ export default {
       drawer: true,
       workspace: null,
       currentUser: null,
+      currentUserName: null,
+      currentUserId: null,
       email: null,
       members: [],
       channels: [],
@@ -107,7 +114,7 @@ export default {
   },
   async beforeMount () {
     const workspaceId = this.$store.state.workspace
-    this.currentUser = this.$store.state.user.name
+    this.currentUserName = this.$store.state.user.name
     this.currentUserId = this.$store.state.user._id
     if (!workspaceId) {
       this.$router.push('/home')
@@ -115,21 +122,40 @@ export default {
       this.workspace = await fetchWorkspace(workspaceId)
       this.members = this.workspace.members
       this.channels = this.workspace.channels
+      this.members.forEach(m => {
+        if (m.name === this.currentUserName) {
+          this.currentUser = m.displayName
+        }
+      })
     }
     this.$socket.emit('join', {channels: this.channels, userId: this.$store.state.user._id, workspace: this.workspace})
   },
   methods: {
-    handlePending (data) {
+    handlePendingChannel (data) {
       this.channels.forEach(channel => {
         if (channel.name === data) {
           channel.pending = true
         }
       })
     },
-    handleUpdatePending (data) {
+    handleUpdatePendingChannel (data) {
       this.channels.forEach(channel => {
         if (channel.name === data) {
           channel.pending = false
+        }
+      })
+    },
+    handlePendingMember (data) {
+      this.members.forEach(member => {
+        if (member.id === data) {
+          member.pending = true
+        }
+      })
+    },
+    handleUpdatePendingMember (data) {
+      this.members.forEach(member => {
+        if (member.displayName === data) {
+          member.pending = false
         }
       })
     },

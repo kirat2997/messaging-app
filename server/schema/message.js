@@ -7,8 +7,12 @@ const messageSchema = new Schema({
   from: String,
   createdAt: String,
   channel: String,
+  type: String,
   workspace: String,
-  key: String
+  fromId: String,
+  toId: String,
+  key: String,
+  convoId: String
 })
 // Export Mongoose model
 module.exports =  mongoose.model('message', messageSchema)
