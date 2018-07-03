@@ -1,4 +1,4 @@
-const { setUserActive, setUserInactive, generateMessage } = require('../helpers/socket')
+const { setUserActive, setUserInactive, generateMessage, saveChannelMessage, fetchChannelMessage } = require('../helpers/socket')
 
 module.exports = function(io) {
   io.on('connect', (socket) => {
@@ -25,13 +25,19 @@ module.exports = function(io) {
       })
     })
 
-    socket.on('sendMessage', (data) => {
+    socket.on('sendMessage', async (data) => {
       const text = data.text
       const from = data.from
       const channel = data.channel
       const workspace = data.workspace
       socket.emit('newMessage', generateMessage(`You`, text, channel))
       socket.broadcast.to(`${channel} - ${workspace}`).emit('newMessage', generateMessage(from, text, channel))
+      await saveChannelMessage(data)
+    })
+
+    socket.on('fetchChannelMessage', async (data) => {
+      const messageSet = await fetchChannelMessage(data)
+      socket.emit('channelMessages', {messageSet, channel: data.channel})
     })
   })  
 }

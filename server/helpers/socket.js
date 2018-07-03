@@ -1,4 +1,5 @@
 const Workspace = require('../schema/workspace')
+const Message = require('../schema/message')
 const { filterWorkspaceData } = require('./filterData')
 const moment = require('moment')
 
@@ -38,4 +39,27 @@ const generateMessage = (from, text, channel) => {
   }
 }
 
-module.exports = { setUserActive, setUserInactive, generateMessage }
+const saveChannelMessage = async function (data) {
+  const text = data.text
+  const from = data.from
+  const channel = data.channel
+  const workspace = data.workspace
+  const now = moment().valueOf()
+  
+  const message = new Message({
+    text,
+    from,
+    createdAt: moment(now).format('h:mm a'),
+    key: now,
+    channel,
+    workspace
+  })
+  await message.save()
+}
+
+const fetchChannelMessage = async function (data) {
+  const chats = await Message.find({channel: data.channel, workspace: data.workspace}).sort({'key': 'asc'})
+  return chats
+}
+
+module.exports = { setUserActive, setUserInactive, generateMessage, saveChannelMessage, fetchChannelMessage }
