@@ -12,7 +12,7 @@ module.exports = function(io) {
       socket.join(workspace)
       io.to(workspace).emit('updateActiveList', wsData)
       channels.forEach(element => {
-        socket.join(`${element} - ${workspace}`)
+        socket.join(`${element.name} - ${workspace}`)
       })
     })
 

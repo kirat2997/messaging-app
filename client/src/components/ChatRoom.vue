@@ -33,10 +33,15 @@ export default {
       messageSet: []
     }
   },
+  beforeMount () {
+    this.$emit('updatePending', this.cname)
+  },
   sockets: {
     newMessage (data) {
       if (data.channel === this.cname) {
         this.messageSet.push(data)
+      } else {
+        this.$emit('pending', data.channel)
       }
     }
   },

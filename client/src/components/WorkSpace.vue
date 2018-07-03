@@ -24,9 +24,10 @@
       <v-divider></v-divider>
       <v-subheader>Channels</v-subheader>
       <v-list dense>
-        <v-list-tile v-for="(m,i) in channels" :key="i" :to="'/workspace/' + m">
+        <v-list-tile v-for="(m,i) in channels" :key="i" :to="'/workspace/' + m.name">
           <v-list-tile-content>
-            <v-list-tile-title># {{ m }}</v-list-tile-title>
+            <v-list-tile-title v-if="m.pending" class="font-weight-bold subheading"># {{ m.name }}</v-list-tile-title>
+            <v-list-tile-title v-else># {{ m.name }}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -72,12 +73,9 @@
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>
-        <v-layout
-          justify-center
-          align-center
-        >
-          <v-flex text-xs-center>
-            <ChatRoom v-for="c in channels" :key="c" v-if="channel === c" v-bind:cname="c" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser"/>
+        <v-layout>
+          <v-flex text-xs-left>
+            <ChatRoom v-for="c in channels" @pending="handlePending" @updatePending="handleUpdatePending" :key="c.name" v-if="channel === c.name" v-bind:cname="c.name" v-bind:wsname="workspace.name" v-bind:currentUser="currentUser"/>
           </v-flex>
         </v-layout>
       </v-container>
@@ -120,6 +118,20 @@ export default {
     this.$socket.emit('join', {channels: this.channels, userId: this.$store.state.user._id, workspace: this.workspace})
   },
   methods: {
+    handlePending (data) {
+      this.channels.forEach(channel => {
+        if (channel.name === data) {
+          channel.pending = true
+        }
+      })
+    },
+    handleUpdatePending (data) {
+      this.channels.forEach(channel => {
+        if (channel.name === data) {
+          channel.pending = false
+        }
+      })
+    },
     signout () {
       this.$socket.emit('signout', {workspace: this.workspace, userId: this.$store.state.user._id})
       this.$store.commit('RESET_WORKSPACE')
@@ -142,7 +154,7 @@ export default {
   sockets: {
     updateActiveList (data) {
       this.members = data.members
-      this.channels = data.channels
+      // this.channels = data.channels
     }
   },
   computed: {

@@ -30,9 +30,13 @@ const filterWorkspaceData = async function (workspaceData) {
       members.push(data)
     })()
   }))
+  let channels = []
+  workspaceData.channels.forEach(channel => {
+    channels.push({name: channel, pending: false})
+  })
   const workspace = {
     name: workspaceData.name,
-    channels: workspaceData.channels,
+    channels,
     members
   }
   return workspace
