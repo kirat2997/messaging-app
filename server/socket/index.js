@@ -29,16 +29,6 @@ module.exports = function(io) {
       socket.join(`${memberId} - ${workspace}`)
     })
 
-    socket.on('signout', async (data) => {
-      socket.leave(data.workspace.name)
-      const wsData = await setUserInactive(data.userId, data.workspace.name)
-      io.to(data.workspace.name).emit('updateActiveList', wsData)
-      data.workspace.channels.forEach(element => {
-        socket.leave(`${element} - ${data.workspace.name}`)
-      })
-      socket.leave(`${data.userId} - ${data.workspace.name}`)
-    })
-
     socket.on('sendChannelMessage', async (data) => {
       const text = data.text
       const from = data.from
@@ -75,6 +65,17 @@ module.exports = function(io) {
     socket.on('newUser', (data) => {
       io.to(data).emit('updateList')
     })
+    
+    socket.on('signout', async (data) => {
+      socket.leave(data.workspace.name)
+      const wsData = await setUserInactive(data.userId, data.workspace.name)
+      io.to(data.workspace.name).emit('updateActiveList', wsData)
+      data.workspace.channels.forEach(element => {
+        socket.leave(`${element} - ${data.workspace.name}`)
+      })
+      socket.leave(`${data.userId} - ${data.workspace.name}`)
+    })
+    
     socket.on('disconnect', async (data) => {
       const account = await Account.findOneAndUpdate({'socket.id': socket.id}, {'socket.active': false}, {new:true})
       if(account){
