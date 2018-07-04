@@ -139,7 +139,7 @@ async function getUserFromToken (decoded) {
   return true
 }
 
-async function fetchUser () {
+export async function fetchUser () {
   try {
     const response = await axios.request({
       url: `/api/accounts/${store.state.user._id}`,

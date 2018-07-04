@@ -8,17 +8,16 @@ const {
   saveMemberMessage,
   fetchMemberMessage } = require('../helpers/socket')
 
+const Account = require('../schema/account')
+
 module.exports = function(io) {
   io.on('connect', (socket) => {
-    console.log(socket.id, 'CONNECTED')
-    
     socket.on('join', async (data) => {
       const channels = data.channels
       const workspace = data.workspace.name
       const memberId = data.userId
-      const members = data.workspace.members
-
-      const wsData = await setUserActive(memberId, workspace)
+      
+      const wsData = await setUserActive(memberId, workspace, socket.id)
       
       socket.join(workspace)
       
@@ -27,15 +26,7 @@ module.exports = function(io) {
       channels.forEach(element => {
         socket.join(`${element.name} - ${workspace}`)
       })
-      
-      const socketArray = []
-      members.forEach(element => {
-        socketArray.push([element.id, memberId])
-      })
-      socketArray.forEach(arr => {
-        arr.sort()
-        socket.join(`${arr[0]} - ${arr[1]} - ${workspace}`)
-      })
+      socket.join(`${memberId} - ${workspace}`)
     })
 
     socket.on('signout', async (data) => {
@@ -45,6 +36,7 @@ module.exports = function(io) {
       data.workspace.channels.forEach(element => {
         socket.leave(`${element} - ${data.workspace.name}`)
       })
+      socket.leave(`${data.userId} - ${data.workspace.name}`)
     })
 
     socket.on('sendChannelMessage', async (data) => {
@@ -58,9 +50,8 @@ module.exports = function(io) {
     })
 
     socket.on('sendMemberMessage', async (data) => {
-      const socketArray = [data.toId, data.fromId].sort()
       socket.emit('newMemberMessage', generateMemberMessage('You', data.text, data.toId, data.fromId))
-      socket.broadcast.to(`${socketArray[0]} - ${socketArray[1]} - ${data.workspace}`).emit('newMemberMessage', generateMemberMessage(data.from, data.text, data.toId, data.fromId))
+      socket.broadcast.to(`${data.toId} - ${data.workspace}`).emit('newMemberMessage', generateMemberMessage(data.from, data.text, data.toId, data.fromId))
       await saveMemberMessage(data)
     })
 
@@ -72,6 +63,37 @@ module.exports = function(io) {
     socket.on('fetchMemberMessage', async (data) => {
       const messageSet = await fetchMemberMessage(data)
       socket.emit('memberMessages', {messageSet, user: data.user})
+    })
+
+    socket.on('loggedin', async (data) => {
+      socket.join(data)
+    })
+
+    socket.on('newInvitation', async (data) => {
+      socket.broadcast.to(data).emit('ping', data)
+    })
+    socket.on('newUser', (data) => {
+      io.to(data).emit('updateList')
+    })
+    socket.on('disconnect', async (data) => {
+      const account = await Account.findOneAndUpdate({'socket.id': socket.id}, {'socket.active': false}, {new:true})
+      if(account){
+        setTimeout(async ()=>{
+          const backUser =  await Account.findOne({_id: account._id})
+          if(!(backUser.socket.active && backUser.socket.workspace === account.socket.workspace)){
+            if(!backUser.active)
+              await Account.findOneAndUpdate({_id: account._id}, {'socket.id': null, 'socket.active': false, 'socket.workspace': null})
+            
+            socket.leave(account.socket.workspace)
+            const wsData = await setUserInactive(account._id, account.socket.workspace)
+            io.to(account.socket.workspace).emit('updateActiveList', wsData)
+            wsData.channels.forEach(element => {
+              socket.leave(`${element.name} - ${account.socket.workspace}`)
+            })
+            socket.leave(`${account._id} - ${account.socket.workspace}`)
+          }
+        }, 5000)
+      }
     })
   })  
 }

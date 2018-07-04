@@ -8,7 +8,7 @@
         <v-flex style="margin-bottom: 10vh;">
           <ol id="chatRoom">
             <li v-for="m in messageSet" v-bind:message="m" :key="m.key">
-              <b>{{ m.from }}: </b> {{ m.text }}
+              <b>{{ m.from }}: </b> <span v-html="m.text"></span>
               <p style="color: lightgrey">{{ m.createdAt }}</p>
             </li>
         </ol>
@@ -18,16 +18,21 @@
     <v-layout>
       <v-flex xs10 offset-xs1>
         <v-form style="position: absolute; bottom:0; left: 5%; width: 90%" method="post" @submit.prevent="sendMessage">
-          <v-text-field
+          <v-textarea
             full-width
             outline
             v-model="message"
             color="teal darken-2"
             :placeholder="'Message at ' + cname"
             type="text"
-            append-icon="mood"
-            @click:append="() => displayEmoji = !displayEmoji"
-          ></v-text-field>
+            append-icon="send"
+            append-outer-icon="mood"
+            flat
+            height="20px"
+            no-resize
+            @click:append="sendMessage"
+            @click:append-outer="() => displayEmoji = !displayEmoji"
+          ></v-textarea>
         </v-form>
         <picker
           v-if="displayEmoji"
@@ -80,6 +85,10 @@ export default {
   sockets: {
     newMessage (data) {
       if (data.channel === this.cname) {
+        let formatted = this.format(data.text)
+        data.text = formatted
+        formatted = this.anotherFormat(data.text)
+        data.text = formatted
         this.messageSet.push(data)
         setTimeout(() => {
           this.autoScroll()
@@ -90,6 +99,10 @@ export default {
     },
     newMemberMessage (data) {
       if ((data.toId === this.currentUserId && data.fromId === this.obj.id) || (data.fromId === this.currentUserId && data.toId === this.obj.id)) {
+        let formatted = this.format(data.text)
+        data.text = formatted
+        formatted = this.anotherFormat(data.text)
+        data.text = formatted
         this.messageSet.push(data)
         setTimeout(() => {
           this.autoScroll()
@@ -101,6 +114,10 @@ export default {
     channelMessages (data) {
       if (data.channel === this.cname) {
         data.messageSet.forEach(m => {
+          let formatted = this.format(m.text)
+          m.text = formatted
+          formatted = this.anotherFormat(m.text)
+          m.text = formatted
           if (m.from === this.currentUser) {
             m.from = 'You'
           }
@@ -115,6 +132,10 @@ export default {
     memberMessages (data) {
       if (data.user === this.currentUser) {
         data.messageSet.forEach(m => {
+          let formatted = this.format(m.text)
+          m.text = formatted
+          formatted = this.anotherFormat(m.text)
+          m.text = formatted
           if (m.from === this.currentUser) {
             m.from = 'You'
           }
@@ -128,6 +149,46 @@ export default {
     }
   },
   methods: {
+    format (text) {
+      if (text) {
+        let match = text.match(/```/gi)
+        let length = 0
+        if (match) {
+          length = match.length
+        }
+        if (length % 2 !== 0) {
+          length = length - 1
+        }
+        for (let i = 0; i < length; i++) {
+          if (i % 2 === 0) {
+            text = text.replace(/```/, `<pre style="font-family:Lucida Sans Typewriter; color: black; background-color: whitesmoke; padding:1vh; font-size:12px; border: 1px solid black; border-radius: 1vh">`)
+          } else {
+            text = text.replace(/```/, `</pre> \n \n`)
+          }
+        }
+      }
+      return text
+    },
+    anotherFormat (text) {
+      if (text) {
+        let match = text.match(/`/gi)
+        let length = 0
+        if (match) {
+          length = match.length
+        }
+        if (length % 2 !== 0) {
+          length = length - 1
+        }
+        for (let i = 0; i < length; i++) {
+          if (i % 2 === 0) {
+            text = text.replace(/`/, `<span style="color: red; background-color: whitesmoke; padding:0.5vh; font-size:12px">`)
+          } else {
+            text = text.replace(/`/, `</span>`)
+          }
+        }
+      }
+      return text
+    },
     insertSymbol (emoji) {
       if (this.message === '') {
         this.message += emoji.native

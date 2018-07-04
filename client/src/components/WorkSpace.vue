@@ -113,24 +113,27 @@ export default {
     ChatRoom
   },
   async beforeMount () {
-    const workspaceId = this.$store.state.workspace
-    this.currentUserName = this.$store.state.user.name
-    this.currentUserId = this.$store.state.user._id
-    if (!workspaceId) {
-      this.$router.push('/home')
-    } else {
-      this.workspace = await fetchWorkspace(workspaceId)
-      this.members = this.workspace.members
-      this.channels = this.workspace.channels
-      this.members.forEach(m => {
-        if (m.name === this.currentUserName) {
-          this.currentUser = m.displayName
-        }
-      })
-    }
+    await this.userList()
     this.$socket.emit('join', {channels: this.channels, userId: this.$store.state.user._id, workspace: this.workspace})
   },
   methods: {
+    async userList () {
+      const workspaceId = this.$store.state.workspace
+      this.currentUserName = this.$store.state.user.name
+      this.currentUserId = this.$store.state.user._id
+      if (!workspaceId) {
+        this.$router.push('/home')
+      } else {
+        this.workspace = await fetchWorkspace(workspaceId)
+        this.members = this.workspace.members
+        this.channels = this.workspace.channels
+        this.members.forEach(m => {
+          if (m.name === this.currentUserName) {
+            this.currentUser = m.displayName
+          }
+        })
+      }
+    },
     handlePendingChannel (data) {
       this.channels.forEach(channel => {
         if (channel.name === data) {
@@ -172,10 +175,11 @@ export default {
           this.text = 'This Email is not registerd with us'
         } else if (resp === 'sent') {
           this.snackbar = true
-          this.text = 'Invitation already sent.'
+          this.text = 'Invitation already sent'
         } else if (resp) {
           this.snackbar = true
-          this.text = 'Invitaion Sent.'
+          this.text = 'Invitaion Sent'
+          this.$socket.emit('newInvitation', this.email)
         } else {
           this.snackbar = true
           this.text = 'Some error occured'
@@ -187,7 +191,9 @@ export default {
   sockets: {
     updateActiveList (data) {
       this.members = data.members
-      // this.channels = data.channels
+    },
+    async updateList () {
+      await this.userList()
     }
   },
   computed: {

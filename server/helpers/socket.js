@@ -1,9 +1,10 @@
 const Workspace = require('../schema/workspace')
 const Message = require('../schema/message')
+const Account = require('../schema/account')
 const { filterWorkspaceData } = require('./filterData')
 const moment = require('moment')
 
-const setUserActive = async function (memberId, name) {
+const setUserActive = async function (memberId, name, socketId) {
   let ws = await Workspace.findOne({name})
   ws.members.forEach(member => {
     if (member.id.equals(memberId)) {
@@ -12,6 +13,7 @@ const setUserActive = async function (memberId, name) {
   })
   ws = await ws.save()
   ws = await filterWorkspaceData(ws)
+  await Account.findOneAndUpdate({_id: memberId}, {'socket.id': socketId, 'socket.active': true, 'socket.workspace': name})
   return ws
 }
 

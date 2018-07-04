@@ -41,7 +41,7 @@
                             <v-btn
                               color="teal darken-2"
                               flat
-                              @click="accept(item.wsid)"
+                              @click="accept(item.wsid, item.wsname)"
                             >
                               Accept
                             </v-btn>
@@ -81,6 +81,7 @@
 import CreateWorkSpace from './subcomponents/CreateWorkSpace.vue'
 import EnterWorkSpace from './subcomponents/EnterWorkSpace.vue'
 import { acceptInvite } from '../helpers/account'
+import { fetchUser } from '../helpers/auth'
 export default {
   props: ['data'],
   name: 'Home',
@@ -100,6 +101,15 @@ export default {
     CreateWorkSpace,
     EnterWorkSpace
   },
+  sockets: {
+    async ping (data) {
+      if (data === this.$store.state.user.email) {
+        await fetchUser()
+        const user = this.$store.state.user
+        this.invitation = user.invitations
+      }
+    }
+  },
   methods: {
     updateList () {
       const user = this.$store.state.user
@@ -115,7 +125,7 @@ export default {
       this.text = data
       this.workspace = this.$store.state.user.workspace
     },
-    async accept (wsid) {
+    async accept (wsid, wsname) {
       if (this.password) {
         if (!this.name) {
           this.name = this.$store.state.user.name
@@ -124,6 +134,7 @@ export default {
         if (resp) {
           this.snackbar = true
           this.text = 'Accepted'
+          this.$socket.emit('newUser', wsname)
         }
         this.dialog = false
         this.updateList()
@@ -134,6 +145,7 @@ export default {
     const user = this.$store.state.user
     this.workspace = user.workspace
     this.invitation = user.invitations
+    this.$socket.emit('loggedin', user.email)
   },
   computed: {
     binding () {
