@@ -1,5 +1,8 @@
 <template>
   <v-app id="inspire">
+    <div v-if="progress">
+      <v-progress-circular style="position: absolute; top: 50%; left: 50%;" :size="50" indeterminate color="teal darken-2"></v-progress-circular>
+    </div>
     <v-snackbar :top="true" :timeout="1000" v-model="snackbar">
       {{ text }}
     </v-snackbar>
@@ -99,6 +102,7 @@ export default {
       dialog: false,
       drawer: true,
       workspace: null,
+      progress: false,
       currentUser: null,
       currentUserName: null,
       currentUserId: null,
@@ -113,7 +117,9 @@ export default {
     ChatRoom
   },
   async beforeMount () {
+    this.progress = true
     await this.userList()
+    this.progress = false
     this.$socket.emit('join', {channels: this.channels, userId: this.$store.state.user._id, workspace: this.workspace})
   },
   methods: {
