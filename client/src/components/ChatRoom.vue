@@ -217,6 +217,7 @@ export default {
       }
     },
     sendMessage () {
+      this.message = this.message.trim()
       if (this.message) {
         if (this.type === 'channel') {
           this.$socket.emit('sendChannelMessage', {workspace: this.wsname, channel: this.cname, text: this.message, from: this.currentUser})
