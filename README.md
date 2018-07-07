@@ -1,4 +1,4 @@
-#TEST CASE
+# TEST CASE
   Account Login
   <br />
   <br />
@@ -32,3 +32,14 @@
   <br />
   password: workspacepassword2
   <br />
+
+# Features
+  1. If you put work between two ` it will be formatted.<br />
+  2. You can put code snippet between ```<br />
+  3. You can send invites to other registered users to join your workspace. <br />
+  4. Emoji is enabled for desktop. <br />
+  5. Can join multiple workspaces with one account. <br />
+
+# Code Structure
+  1. server folder contains all backend files, socket configurations, db schemas, apis
+  2. client folder contains all frontend files i.e Vuejs templates.
