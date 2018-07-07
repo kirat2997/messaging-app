@@ -14,7 +14,7 @@ Vue.use(Vuetify)
 
 sync(store, router)
 
-const socket = io('')
+const socket = io()
 Vue.use(VueSocketIO, socket, store)
 
 Vue.config.productionTip = false
